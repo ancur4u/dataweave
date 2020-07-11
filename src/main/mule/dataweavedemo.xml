@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="dataweavedemoFlow" doc:id="a50c35bb-c94e-4850-a655-0a776b67c4ff" >
+		<ee:transform doc:name="Transform Message" doc:id="775c8f11-4c3a-4d16-a01d-145a01d7c692" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output json
+var playerList=readUrl("classpath://playerList.json","application/json")
+---
+playerList[0] filterObject ((value) -> value == "RCB") mapObject{
+	($$):$
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweavedemoFlow1" doc:id="f010e46b-ab76-4a4b-8b13-b1ef5958c25b" >
+		<ee:transform doc:name="reduce" doc:id="f92e5ccb-75b1-4b01-af6a-9964963a35ff" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var retailOrderList=readUrl("classpath://retailOrders.json","application/json")
+var myNums = [1,2,3,4]
+var myEmptyList = []
+---
+{
+	"invoice": retailOrderList.retailOrders map(value,index) -> 
+	{
+		"orderID": value.orderId as String,
+		"customerName": value.customerDetails.firstName ++ " " ++ value.customerDetails.lastName as String,
+		"itemsPurchased": value.orderDetails.itemList map(value,index)->
+		{
+			"itemName": value.itemName as String,
+			"quantity": value.qty as Number,
+			"amount": (value.qty * value.rate) as Number
+		},
+		"totalItems": value..*qty reduce ($ +$$),
+		"totalBill": value.orderDetails.itemList reduce(
+						(item,net=0) -> 
+						(net + item.rate * item.qty) as Number
+		)
+	},
+	"sum": myNums reduce ($$ + $),
+	"concatNum": myNums reduce ($$ ++ $),
+	"emptyList": myEmptyList reduce ($$ ++ $),
+	"concatLetters": ["a", "b", "c", "d"] reduce ((item, acc = "z") -> acc ++ item),
+	"sumofArray": [0, 1, 2, 3, 4, 5] reduce ((item, acc = 3) -> acc + item),
+	"multiply": [2,3,3] reduce ((item, acc) -> acc * item),
+	"multiplyAcc": [2,2,3] reduce ((item, acc = 3) -> acc * item)
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="flatten" doc:id="84d7ee30-b939-4074-94d3-242b41c39782" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output json
+import * from dw::core::Arrays
+var playerList=readUrl("classpath://playerRecord.json","application/json")
+var array1 = [1,2,3]
+var array2 = [4,5,6]
+var array3 = [7,8,9]
+var arrayOfArrays = [array1, array2, array3]
+var myData =
+{ user : [
+   {
+     group : "dev",
+     myarray : [
+       { name : "Mariano", id : 1234 },
+       { name : "Carino", id : 5678 }
+     ]
+   }
+ ]
+}
+---
+{
+	"newArray": flatten(arrayOfArrays),
+	"nameDetails": flatten(myData.user.myarray),
+	players: flatten(playerList..*ContactDetails)
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="pluck" doc:id="94a49ab9-2caf-43aa-8e99-2a33ef30834f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output json
+import * from dw::core::Arrays
+var readXml = readUrl("classpath://rates.xml", "application/xml")
+var playerList=readUrl("classpath://playerRecord.json","application/json")
+fun pluckKeys(obj)=obj pluck $$
+fun pluckValues(obj)=obj pluck $
+---
+{
+	"pluckSample": {
+		"a": "b",
+		"c": "d"
+	} pluck (value,key,index) -> {
+		(index) : {
+			(value):key
+		}
+	},
+	"result": {
+		"keys": readXml.rates pluck($$),
+		"values": readXml.rates pluck($) as Number,
+		"indices": readXml.rates pluck($$$)
+	},
+	playerRecords: playerList.*player map(player,index)->{
+		"name": player.playerName,
+		"performanceValues": player.performance pluck $,
+		"performanceFields": player.performance pluck $$,
+		"contactDetailsType": pluckKeys(player.ContactDetails),
+		"contactDetailValues": pluckValues(player.ContactDetails),
+		"MobileNumber": pluckValues(player.ContactDetails)[indexOf(pluckKeys(player.ContactDetails),"Home")] as String
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

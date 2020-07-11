@@ -1,0 +1,41 @@
+{
+	"player":
+		{
+			"playerId": 100,
+			"playerSkills": "Batsmen",
+			"playerTeam": "RCB",
+			"teamHQ": "Bangalore",
+			"playerName": "Virat Kohli",
+			"playerAge": 31,
+			"performance":
+				{
+					"Centuries": 200,
+					"BestBowling": "5/20",
+					"NetRunRate": 55
+					},
+			"ContactDetails":
+				{
+					"Mobile": "1111111111",
+					"Home": "022123456"
+				}
+		},
+		"player":
+		{
+			"playerId": 101,
+			"playerSkills": "Bowler",
+			"playerTeam": "MI",
+			"teamHQ": "Mumbai",
+			"playerName": "Jasprit Bumrah",
+			"playerAge": 31,
+			"performance":
+			{
+				"Centuries": 2,
+				"BestBowling": "8/19",
+				"NetRunRate": 20
+				},
+			"ContactDetails":{
+				"Mobile": "9999999999",
+				"Home": "022654321"
+			}
+		}
+}

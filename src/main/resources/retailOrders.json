@@ -1,0 +1,49 @@
+{
+	"retailOrders":[
+		{
+			"orderId": "abc123",
+			"customerDetails":{
+				"firstName": "Ankur",
+				"lastName": "Parashar",
+				"contactNumber": "123456789",
+				"city": "Noida"
+			},
+			"orderDetails":{
+				"itemList":
+				[
+					{
+						"itemName": "TV",
+						"qty": "1",
+						"rate": "1000"
+					},
+					{
+						"itemName": "Router",
+						"qty": "2",
+						"rate": "1300"
+					}
+				]
+			}
+		
+		},
+		{
+			"orderId": "xyz123",
+			"customerDetails":{
+				"firstName": "Ayush",
+				"lastName": "Parashar",
+				"contactNumber": "9999999999",
+				"city": "Jaipur"
+			},
+			"orderDetails":{
+				"itemList":
+				[
+					{
+						"itemName": "WashingMachine",
+						"qty": "3",
+						"rate": "2000"
+					}
+				]
+			}
+		
+		}
+	]
+}
